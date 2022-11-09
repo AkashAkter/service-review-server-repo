@@ -19,6 +19,13 @@ async function run() {
     try {
         const serviceCollection = client.db('photography').collection('services');
 
+        const user = {
+            name: 'Akash',
+            email: 'akash@gmail.com'
+        }
+        const result = await serviceCollection.insertOne(user);
+        console.log(result);
+
         app.get('/services', async (req, res) => {
             const query = {};
             const cursor = serviceCollection.find(query);
