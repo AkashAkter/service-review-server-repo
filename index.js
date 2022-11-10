@@ -16,6 +16,8 @@ console.log(process.env.DB_USER);
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.a23vi3u.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+
+/* Verifying User */
 function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -36,14 +38,16 @@ async function run() {
         const serviceCollection = client.db('photography').collection('services');
         const reviewCollection = client.db("photography").collection("review");
 
+        /* JWT POST */
         app.post('/jwt', (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
-            // { expiresIn: '1h' }
             res.send({ token });
 
         })
 
+
+        /* Getting Service */
         app.get('/services', async (req, res) => {
             const query = {};
             const cursor = serviceCollection.find(query);
@@ -51,6 +55,8 @@ async function run() {
             res.send(services);
         });
 
+
+        /* Getting Service by ID */
         app.get('/services/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
@@ -60,12 +66,16 @@ async function run() {
             res.send(service);
         });
 
+
+        /* Adding New Service */
         app.post("/services", async (req, res) => {
             const review = req.body;
             const result = await serviceCollection.insertOne(review);
             res.send(result);
         });
 
+
+        /* Getting Reviews with email*/
         app.get("/reviews", verifyJWT, async (req, res) => {
             const decoded = req.decoded;
             console.log(decoded);
@@ -83,24 +93,15 @@ async function run() {
             res.send(services);
         });
 
-        app.get("/reviews", async (req, res) => {
-            let query = {};
-            if (req.query.service) {
-                query = {
-                    service: req.query.service
-                }
-            }
-            const cursor = reviewCollection.find(query);
-            const services = await cursor.toArray();
-            res.send(services);
-        });
 
+        /* Adding Reviews*/
         app.post("/reviews", async (req, res) => {
             const review = req.body;
             const result = await reviewCollection.insertOne(review);
             res.send(result);
         });
 
+        /* Deleting Reviews with Id */
         app.delete("/reviews/:id", async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
