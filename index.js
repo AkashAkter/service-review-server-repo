@@ -56,7 +56,6 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const reviews = await reviewCollection.find({ service: id }).toArray();
             let service = await serviceCollection.findOne(query);
-
             service['reviews'] = reviews;
             res.send(service);
         });
