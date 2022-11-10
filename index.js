@@ -54,14 +54,23 @@ async function run() {
         app.get('/services/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
-            const service = await serviceCollection.findOne(query);
+            const reviews = await reviewCollection.find({ service: id }).toArray();
+            let service = await serviceCollection.findOne(query);
+
+            service['reviews'] = reviews;
             res.send(service);
+        });
+
+        app.post("/services", async (req, res) => {
+            const review = req.body;
+            const result = await serviceCollection.insertOne(review);
+            res.send(result);
         });
 
         app.get("/reviews", verifyJWT, async (req, res) => {
             const decoded = req.decoded;
             console.log(decoded);
-            if (jwt.decode.email !== req.query.email) {
+            if (decoded.email !== req.query.email) {
                 res.status(403).send({ message: 'unauthorized access' })
             }
             let query = {};
